@@ -1,0 +1,30 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Methodology}
+
+\subsection{Train Set Filtering}
+We identify the set of hardest questions by evaluating the learner model on the train set, which in this case is on the task of question answering of the GSM8K. For $N$ responses we extract the last number of the sequence which is matched again the expected numerical response. We consider this set as the hardest questions for the model in the dataset, which would be expressed as follow. $ hard_q =  N - correct_q $
+In our case using LLAMA3-8B-IT with zero-shot CoT resulted on $ 2200 = 7400 - 51800 $ We proceed to iterate over this set, as the feedback to be provided assumes that the answer is incorrect, also as we conjecture that the parameters to the models are suficiently aligned to answer the easier questions.
+\subsection{Synthetic Data Generation}
+The incorrect responses are repaired by a process of iteritevely exchange generation between two models, one for feedback and another one for refinement, which in practice is the same model with different prompting. This procedure is repeated over all the unsolved questions until a stop criteria is met.
+\paragraph{Feedback Generation}
+\paragraph{Refinement Generation}
+\paragraph{Stop Criteria}
+
+\subsection{Training}
+
+
+\end{document}

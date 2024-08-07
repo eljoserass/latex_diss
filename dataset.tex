@@ -27,6 +27,8 @@ Introduced by [cite], a dataset on the task of QA with 7.47k on the train and 1.
 
 
 \subsection{Evaluation}
-here just about how the evaluation is done
+We use a zeroshot with greeding decoding on the test set to evaluate the performance of the models. Firstly the baseline model without any fine-tunning applied and then we repeat the same procedure with the fine-tuned models. In order to compare them we compute the accuracy as  $accuracy = correct \div total$. We use [cite lm-eval] with the flexible extraction mechanism to find the number corresponding to the answer, which simply uses the last occurence of a regex pattern that allow for some non-numeric characters to be included in the answer and will count them as correct. Aditionally we test our method against fine-tunning using the gold labels from the dataset, providing a perspective on improvement on the already available data.
+
+
 
 \end{document}

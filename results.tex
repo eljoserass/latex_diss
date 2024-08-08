@@ -18,6 +18,46 @@
 big sft table with something like name / accuracy / instances / max sequence
 name will probably have the sanitized or not / the completions only or not / the checkpoint / the name of the set
 
+
+\paragraph{SFT Results}
+Unless stated otherwise, all of the following experiments for 500 steps
+
+\begin{center}
+\begin{tabular}{lcc}
+
+Name & Accuracy & Instances \\
+baseline & 0.6839 & Nan\\
+hard-q solved sanitized& 0.6861 & 945\\
+hard-q solved sanitized checkpoint-30 & 0.6884 & 945\\
+hard-q solved sanitized checkpoint-140 & 0.6884 & 945\\
+all solved (sanitized refinements only)& 0.7074 & 6333\\
+all solved & 0.7028 & 6340\\
+all solved sanitized & \textbf{0.7542}  & 6333\\
+hard-q solved sanitized + gold & 0.7005  & 2085\\
+all solved (sanitized refinements only) + gold & 0.6945 & 7473 \\
+hard-q gold & 0.7513 & 2085 \\
+full gold & 0.7498 & 7473 \\
+hard-q unsolved gold & 0.7445 & 1140 \\
+hard-q unsolved checkpoint-30 & 0.6876 & 1140 \\
+hard-q solved + gold with prefix & 0.6839 & 2085 \\
+hard-q gold with prefix & 0.7225 & 2085 \\
+easy-q & 0.6975 & 5388 \\ 
+\end{tabular}
+\end{center}
+
+\paragraph{DPO Results}
+
+\begin{center}
+ \begin{tabular}{lcc}
+ Name & Accuracy & Instances \\
+ hard-q solved & 0.216 & 952 \\
+ hard-q solved SFT + DPO & 0.2729 & 952 \\
+ hard-q solved RPO [cite rpo] & 0.08491 & 952 \\
+ 
+ \end{tabular}
+\end{center}
+
+
 small dpo table
 \subsection{Discussion}
 here some losses

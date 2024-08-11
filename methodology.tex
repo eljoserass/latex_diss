@@ -17,11 +17,12 @@
 \section{Methodology}
 
 This section will discuss the method used, which overall consits in three sequential steps, evaluating the model on the training set of the GSM8K to filter the questions where the models parameters are less aligned to answer, then iteritevely generating new answers over this section of the dataset, preparing sets of data with the appropiate format to be used for training, and using different methods for training the model. The resulting models from the training stage will be evaluated on the test set of the GMM8K using the same process as the filtering stage of the training set.
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.3]{figures/method_sample}
-\caption{Overview of the mechanism}
-\end{figure}
+
+%\begin{figure}[h]
+%\centering
+%\includegraphics[scale=0.3]{figures/method_sample}
+%\caption{Overview of the mechanism}
+%\end{figure}
 
 
 \subsection{Train Set Filtering}
@@ -68,11 +69,11 @@ A math word problem is a mathematical exercise where a significant part of the b
 \paragraph{Grade School Math 8k (GSM8K)}
 Introduced by [cite], a dataset on the task of QA with 7.47k on the train and 1.32k on the test split. Each question is a MWP and the answer contain two pieces of information, an integer which is the target value and value a \textbf{gold} answer written by a humman, it contains the steps that lead to the integer, with relevant algebraic operations and their result. The steps in the gold answer are similary structured, and separeted by new lines, and at the end clearly state the precise integer which steps led to, this is what will be used as a label and will be used to determine if the answer is correct or not, independently of the steps. A metric on how ``hard'' a question is would be the amount of steps in the gold lead to the integer value. This dataset was a suitable candidate to test our hypothesis thanks to writing style that elicit in the model, which we conjecture that is esier to iterate as it can be approached atomically by the model by providing feedback to each step that led to the answer. Each problem is relatively unique, preventing the model from exploiting common patterns in the solving of the problems therefore allowing us to conduct better research on how the model can generalize its reasoning to solve the problems.
 
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.3]{figures/dataset_example}
-\caption{Example of a instance in the GSM8k, for simplicity we removed the special characters in the actual setup}
-\end{figure}
+%\begin{figure}[h]
+%\centering
+%\includegraphics[scale=0.3]{figures/dataset_example}
+%\caption{Example of a instance in the GSM8k, for simplicity we removed the special characters in the actual setup}
+%\end{figure}
 
 \subsection{Evaluation}
 We use a zeroshot with greeding decoding on the test set to evaluate the performance of the models. Firstly the baseline model without any fine-tunning applied and then we repeat the same procedure with the fine-tuned models. In order to compare them we compute the accuracy as  $accuracy = correct \div total$. We use [cite lm-eval] with the flexible extraction mechanism to find the number corresponding to the answer, which simply uses the last occurence of a regex pattern that allow for some non-numeric characters to be included in the answer and will count them as correct. Aditionally we test our method against fine-tunning using the gold labels from the dataset, providing a perspective on improvement on the already available data.

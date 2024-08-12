@@ -27,6 +27,7 @@ Unless stated otherwise, all of the following experiments for 500 steps
 \begin{tabular}{lcc}
 
 Name & Accuracy & Instances \\
+\hline
 baseline & 0.6839 & Nan\\
 baseline 8-shot CoT & 0.768 & Nan \\
 hard-q solved sanitized& 0.6861 & 945\\
@@ -58,6 +59,7 @@ easy-q gold & 0.73 & 5388 \\
 \centering
  \begin{tabular}{lcc}
  Name & Accuracy & Instances \\
+ \hline
  hard-q solved & 0.216 & 952 \\
  hard-q solved SFT + DPO & 0.2729 & 952 \\
  hard-q solved RPO [cite rpo] & 0.08491 & 952 \\
@@ -111,6 +113,7 @@ If we want to understand how the model answer different questions, a good way is
 \centering
  \begin{tabular}{lcccc}
  Name & Accuracy & Draw & Win & Lose\\
+ \hline
  baseline & 0.6839 & 1085 & 64 & 170 \\
  hard-q solved sanitized & 0.6861 & 1068 & 74 & 177\\
  \end{tabular}
@@ -130,6 +133,7 @@ To get a more clear view on what makes the models different is to keep looking t
 \centering
  \begin{tabular}{lccc}
  Name  & Median Diff Lenght & Mean Diff Lenght & Mean Cosine Similarity \\
+ \hline
  baseline & 18.00 & 31.69  & 0.2497 \\
  hard-q solved sanitized & -11.00 & -50.69 & 0.2751 \\
  \end{tabular}
@@ -141,6 +145,12 @@ Overall we see that the in this case the less capable model \textbf{hard-q solve
 When looking into the cosine similarity we see the cosine similarity of 0.249 for the basline and 0.2751 for hard-q solved sanitized, when computed between \textbf{all solved sanitized}, this indicate that responses between model are somewhat similar. Between easy-q and hard-q solved sanitized datasets, there is a cosine similarity of 0.27, this similarity could explain the cosine similarity observed between the responses of both finetuned versions at test time. With this observations we could conclude that the main driving factor of correctness for this case, is the lenght of the response, which it can be atributed to the nature of CoT of explaining the raitional to the final answer step-by-step, although as seen, a response too long could cause the model to produce a smaller accuracy. An explanation on why longer sequences could cause more errors may be that as the longer the sequence of steps, the more likely it is for the model to generate a token that could cause the reasoning chain to deviate from the correct answer.
 
 \subsubsection {Through the lens of distributions}
+An insight from the experiments is that it is ont always the case that more data leads to better results. When  using only gold data to train the model, we can see that \textbf{hard-q gold} has greater accuracy than \textbf{full gold}, using ~3 times less data. Another example of this can be seen on \textbf{hard-q unsolved gold} which is the smaller set that yields the best results, only with a small difference of ~0.006 in accuracy against \textbf{hard-q gold} being ~1.7 times smaller, and ~6.5 times smaller than \textbf{full gold}.
+
+This is an example that shows the value of the filtering mechanism used to identify the hardest questions for the model. This is not only observed when trained with gold labels, as it also happens when using synthetic data only. The model \textbf{all solved sanitized} exhibits the superior performance when compared with models that use more data to train, such as \textbf{all solved sanitized + gold} or \textbf{all gold}.
+
+A reason why the use of synthetic data might be better for this task than using gold labels, could be that as the model is already aligned to predict the data is trained on, the signal from the loss function could be focusing on being used to parameters that have a more a direct impact on computing the correct result in a math world problem, rather than, for instance focusing on optimizing writing style to be adapted as the writing in the gold labels. Another good reason to use synthetic data is that is easier to expand and improve, as it is dynamic there are ways to explore on how to improve the quality of this data generated from the model in the initial pass and the refinement step, being more cheap than collecting data from human crowdworkes. 
+
 \subsection{What makes some questions harder than others?}
 \subsubsection{Lenght of the question}
 \subsubsection{Amount of numbers in question}
@@ -149,6 +159,10 @@ When looking into the cosine similarity we see the cosine similarity of 0.249 fo
 \subsubsection{Operations in gold answer}
 \subsubsection{Number sizes in gold answer}
 \subsubsection{What kind of question-answer was the model able to refine?}
+
+\section{Conclusion}
+overview improvements future work
+\subsection{Future Work}
 
 
 

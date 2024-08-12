@@ -36,6 +36,7 @@ hard-q solved sanitized 50k steps &  0.548  & 946 \\
 all solved (sanitized refinements only)& 0.7074 & 6333\\
 all solved & 0.7028 & 6340\\
 all solved sanitized & \textbf{0.7642}  & 6333\\
+all solved sanitized + gold & 0.7391 & 7473 \\
 all solved sanitized 8-shot CoT & 0.7915 & 6333 \\ 
 hard-q solved sanitized + gold & 0.7005  & 2085\\
 all solved (sanitized refinements only) + gold & 0.6945 & 7473 \\
@@ -93,7 +94,16 @@ Not only the expected generated text has a direct impact on the loss, but also t
 
 \textbf{easy-q gold, hard-q gold, hard-q unsolved LOSS GRAPH}
 
+
+Although in most cases higher loss means better accuracy, our observations has proven that this is not necesarly the case. For instance \textbf{hard-q solved sanitized checkpoint-30} is evaluated in a point when the accuracy is higher than the counterpart on 500 steps, and in this case, it leads to better accuracy, although by small margin. When this same hypothesis is tested with \textbf{hard-q solved unsolved gold checkpoint-30} the accuracy decreases by a margin of ~0.05. Another example of this phenomenom is in the difference in loss between \textbf{hard-q solved sanitized} and \textbf{all solved sanitized} where the latter has a significantly higehr accuracy by a margin of ~0.07 with a smaller loss. Motivated by the observation that models trained on gold data usually have higher accuracy with higher loss, we tried to apply this to \textbf{all solved sanitized + gold} were adding the gold labels would increase the overall loss and with it, the accuracy. We reported that this actually decreases the accuracy by ~0.02, having greatier impact in the accuracy decrease than a comparable experiment done with \textbf{all solved sanitized refinements only + gold}, that decreases the accuracy by less than ~0.01. 
+
 \textbf{all the losses vertically}
+
+
+Our intuitions from this results would be that when there is proportionally less examples of gold labels than generated ones, the model struggles to optimize a common pattern, as the gold labels are very different in structure when compared with generated labels. This is supported by two observations, firstly that when comparing \textbf{hard-q solved sanitized} and \textbf{hard-q solved sanitized + gold} in this case increases because there is proportionally more gold labels than generated ones, and this exposure allows the model to more accurately learn a pattern that usually leads to higher accuracy, likely thanks to the homogenous structure of the text. Secondly, this benefit from homogenous structure is seen on the sanitazion, where it improved all of the results where this was applied, except when this was applied on gold labels.
+
+\textbf{here some pic comparing text of gold, sanitized and double sanitized}
+
 
 \subsubsection{Through the lens of the accuracy}
 If we want to understand how the model answer different questions, a good way is to ask if the accuracy is cummulative, meaning that if better models answer correctly all the answer correctly that a worse model would, in adition to the answers that the worse model could not get correctly. With this question we would be able to identify if the main driving force of improvement comes from a specific set of questions that a worse model was definetly not able to answer, and an improved version woul be able to. By comparing accuracy distribution accross the entire test set, between the \textbf{all solved sanitized} and \textbf{hard-q solved sanitized} and also between \textbf{all solved sanitized} and \textbf{baseline}, we have found that the accuracy is not entirely commulative, as the instances were the less capable model is capable to answer when the smarter model is not is non-zero. 

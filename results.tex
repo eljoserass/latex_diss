@@ -159,19 +159,21 @@ This is an example that shows the value of the filtering mechanism used to ident
 A reason why the use of synthetic data might be better for this task than using gold labels, could be that as the model is already aligned to predict the data is trained on, the signal from the loss function could be focusing on being used to parameters that have a more a direct impact on computing the correct result in a math world problem, rather than, for instance focusing on optimizing writing style to be adapted as the writing in the gold labels. Another good reason to use synthetic data is that is easier to expand and improve, as it is dynamic there are ways to explore on how to improve the quality of this data generated from the model in the initial pass and the refinement step, being more cheap than collecting data from human crowdworkes. 
 
 \subsection{What makes some questions harder than others?}
-A simple way is to measure the following aspects from the GSM8K, and compute the correlation between the answer being corret based on those metrics.
+A simple way is to measure the following factors from the GSM8K, and compute the correlation between the answer being corret based on those metrics.
 
 \begin{itemize}
- \item \textbf{Lenght of the question} Count the character lenght of the question.
- \item \textbf{Amount of numbers in question} Count the amount of numbers present in the Math Word Problem question.
- \item \textbf{Amount of steps in gold answer} Gold answers are written by humans with a clear structure for each step separeted by a newline, count the new lines and use that as number of steps.
- \item \textbf{Lenght of the steps in gold}: Count the lenght of each step, and divide it by the amount of steps.
+ \item \textbf{Question Lenght} String size of the question.
+ \item \textbf{Number of numbers in question} Count the amount of numbers present in the Math Word Problem question.
+ \item \textbf{Number of gold steps} Gold answers are written by humans with a clear structure for each step separeted by a newline, count the new lines and use that as number of steps.
+ \item \textbf{Number of number in gold answer}Count the amount of numbers present in the gold answer.
+ \item \textbf{Gold answer lenght} String size of the gold answer
+ \item \textbf{Mean step lenght}: Count the lenght of each step, and divide it by the amount of steps.
  \item \textbf{Operations in gold answer} Count the times each operation (+-/*) is used in the gold answer.
  \item \textbf{Total number of operations} Total amount of operations used in the gold answer.
- \item \textbf{Number sizes in gold answer} The order ? or the number expectred to answer.
+ \item \textbf{Expected Label size} The amount of digits in the expected number in the answer.
 \end{itemize}
 
-
+The follwing table was extracted from the data collected in the initial filtering step of the training set, where we look at the full training set with paired with the gold answers, and a label wether the model was able to answer or not. We use this set to understand the nature on why the model is able to answer some questions and others is not.
 \begin{table}[htbp]
 \centering
 \setlength{\tabcolsep}{4pt}  % Reduce column separation
@@ -185,6 +187,7 @@ Gold answer length & -0.1831 & 0.0000 & Challenging \\
 Number of gold steps & -0.1377 & 0.0000 & Moderately challenging \\
 Mean step length & -0.1308 & 0.0000 & Moderately challenging \\
 Question length & -0.1228 & 0.0000 & Moderately challenging \\
+Total number of operations & -0.1065 & 0.0000 & Moderately challenging \\
 Multiplication (*) operations & -0.0998 & 0.0000 & Slightly challenging \\
 Division (/) operations & -0.0872 & 0.0000 & Slightly challenging \\
 Subtraction (-) operations & -0.0100 & 0.3890 & Negligible effect (not statistically significant) \\
@@ -196,9 +199,12 @@ Expected label size & -0.0014 & 0.9013 & No significant effect \\
 \label{tab:gsm8k_correlations}
 \end{table}
 
+With the results on Table \ref{tab:gsm8k_correlations} we can see a clear pattern that defines what can be considered a hard question from the model, where more numbers contained in the MWP directly makes the question harder, to answer. This is also sustained by the expected complexity of the answer by the number of characters and amount of numbers it contains. Interestingly, it is not as correlated the lenght of the question but the amount of numbers it contains, which makes sense as the model is able to filter the extra text and focus of the numbers as it would be the key complexity driver. Another interesting insight is that, although not as significant, is that questions that require more complex operations such as multiplication and division have a negative impact on the answer being solved, in comparison with simpler operations like addition and substraction that have barely any effect. It is also worth noting that the size of the number expected to be answered by the number has no effect on the model answering the question correctly, so the model will generaly will have the same ability to solve operations that result in a bigger number as well as a smaller number.
 
 \subsubsection{What kind of questions was the model able to refine?}
+An open question is also what makes different the questions that the model was able to refine after 7 iterations and the question that the model was not able to, as the model in this step does not necesarly will struggle with the same things as the initial pass. This will give us insight as how the model processes the refinement and also what kind of weakness can be improved for the feedback generated being used to refine the answer. The refinement process success rate on 7 passes is 45.32, which on one side is a good indication that refinement process is actually improving previously wrong answers, and on the other side makes us question what was the case for the wrong answers that were not able to be refined, and if it is only a matter of iterations to refine all answers or there is a more profound reason that makes the model nor being able to refine answers even after more passes.
 
+By looking at Table \ref{tab:gsm8k_refinement_correlations} we see that the strongest factor that impedes the model to refine an answer is the amount of addition operations in the expected gold solution. This is counter-intiutive as in the initial pass, the type of operations performed have barely any effect, and if any the hardest questions were the ones that were expected to do divisions and multiplication not addition. In \ref{tab:gsm8k_correlations} we see that addition and substraction are very close to having the same effect on the question bein able to be answered or not, but in the case for refinements, there is a clear difference in the effect of addition and substraction. This insight could mean that the model is not necesarly generalazing well the addition operation, which did not seem to be a problem originally. This could also mean that, when the model is providing the feedback is not being able to correctly identify that the problem comes from an addition in the reasoning, so when the model is using the feedback to refine it is getting not enough signal to improve that part of the calculation. It could also mean that simply the questions that were not being able to be refined included a particularly hard sequence of additions, but further experiments are needed to sustain these claims. The rest of the factors that are hindering the refinement process, are similar to what it made the model to answer incorrectly in the first place, which relate to the complexity of the question, measured by the lenght, the amount of number and amount of gold steps. Interestingly, the model was able to refine questions with expected larger number, although this correlation is barely significant.
 \begin{table}[htbp]
 \centering
 \setlength{\tabcolsep}{4pt}  % Reduce column separation
@@ -211,6 +217,7 @@ Question length & -0.0956 & 0.0000 & Hindering \\
 Number of gold steps & -0.0946 & 0.0000 & Hindering \\
 Gold answer length & -0.0913 & 0.0000 & Hindering \\
 Number of numbers in gold answer & -0.0854 & 0.0001 & Hindering \\
+Total operations & -0.0801 & 0.0003 & Moderately hindering \\
 Number of numbers in question & -0.0634 & 0.0038 & Slightly hindering \\
 Mean step length & -0.0459 & 0.0362 & Slightly hindering \\
 Subtraction (-) operations & -0.0416 & 0.0573 & Very slightly hindering (not statistically significant) \\
@@ -223,7 +230,29 @@ Expected label size & 0.0433 & 0.0480 & Slightly helping (barely statistically s
 \label{tab:gsm8k_refinement_correlations}
 \end{table}
 
+\textbf{NOTE GRAPHIC OF THE REFINEMENTS}
+
 \subsubsection{What kind of answers was the model able to refine}
+Another way to understand what enabled the model to refine a an answer, is not necesarly by the perspective of a what made a question harder, but by looking directly at the text, comparing the intially incorrect answer and succesful refinements, as there might patterns that the model is exploiting to refine the input sequence of the incorrect answer.
+
+We can measure this by the following metrics:
+\begin{itemize}
+ \item Computing the cosine similarity \textbf{NOTE MAYBE ADD THIS IN BACKGROUND OR EVALUTION}between the incorrect answer and the refinement to see how semantically different are the answers from one another.
+ \item Comparing the lenght of the string between each answer.
+ \item Comparing the number of operations between the answers
+\end{itemize}
+
+By the measure of the cosine similarity, the results indicate that the answers are semantically very similar, which is a sign that the model is not necesarly exploiting a pattern of changing the style of the answer but instead fixing the particular incorrect operations.
+
+\textbf{ADD HISOTGRAM COSINE SEMILARITY}
+
+Most of the incorrect answers that are refined remain with similar lenght, although there are some cases were the scatter indicates that the answer is either longer or much shorter. For the case where the answer is much shorter, it can be attributed by the answers that were directly mapped by a sentence without describing the steps, this answers can also be attributed to the cases where there is significant diffrence in the cosine similarity. This answers were removed in the sanitazion process. For the answers that are longer it can be the case that the number of operations necessary increased, thereby the lenght of the answer also increased.
+
+\textbf{NOTE ADD LENGHT SCATTER}
+
+The number of operations vary, indicating that the refinement process is able to fix answers in various complexities.The most common pattern is the case where the refinement contains more operations than the incorrect counterpart, suggesting that the model is correcly identifying the missing steps and operations to achieve the answer. There is a significant amount of refinements that stays with the same number operations, this can be the case where the model fixed specific errors in the operations inside the steps, rather than adding more steps. Another commong pattern, although not as common as the previously mentioned, is the cases where the refinement contains less operations than the incorrect answer, meaning that the model might have been able to fix the reasoning chain by removing unnecesary operations and steps that lead to the correct answer.
+
+\textbf{NOTE add number of operations plot}
 \begin{table}[ht]
 \centering
 \begin{tabular}{lcc}
@@ -232,7 +261,6 @@ Metric & Original Incorrect & Refined Correct \\
 \hline
 Mean Cosine Similarity & \multicolumn{2}{c}{0.85} \\
 Mean Answer Length & 615 & 731 \\
-Median Readability Score & 6.5 & 7.1 \\
 Mean Number of Operations & 4.2 & 5.8 \\
 \hline
 \end{tabular}
@@ -240,5 +268,10 @@ Mean Number of Operations & 4.2 & 5.8 \\
 \label{tab:summary}
 \end{table}
 
+Overall, these results show that the model is correctly applying the feedback necesary to refine the answer, where each question might have a different flawed step. This is a good sign of the generalization ability of the model for applying feedback, as it is not relying on a specific patter to exploit to reach the correct answer but rather following the instructions of the feedback to solve the previously incorrect answer.
+
+\section{Conclusion}
+
+\subsection{Future Work}
 
 \end{document}

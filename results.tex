@@ -24,9 +24,9 @@ Unless stated otherwise, all of the following experiments for 500 steps
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{lcc}
-
-Name & Accuracy & Instances \\
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Name} & \textbf{Accuracy} & \textbf{Instances} \\
 \hline
 baseline & 0.6839 & Nan\\
 baseline 8-shot CoT & 0.768 & Nan \\
@@ -49,6 +49,7 @@ hard-q solved + gold with prefix & 0.6839 & 2085 \\
 hard-q gold with prefix & 0.7225 & 2085 \\
 easy-q & 0.6975 & 5388 \\ 
 easy-q gold & 0.73 & 5388 \\
+\hline
 \end{tabular}
 \caption{main table}
 \end{table}
@@ -57,12 +58,14 @@ easy-q gold & 0.73 & 5388 \\
 
 \begin{table}[ht]
 \centering
- \begin{tabular}{lcc}
- Name & Accuracy & Instances \\
+ \begin{tabular}{|l|c|c|}
+ \hline
+ \textbf{Name} & \textbf{Accuracy} & \textbf{Instances} \\
  \hline
  hard-q solved & 0.216 & 952 \\
  hard-q solved SFT + DPO & 0.2729 & 952 \\
  hard-q solved RPO [cite rpo] & 0.08491 & 952 \\
+ \hline
  \end{tabular}
  \caption{small dpo table}
 \end{table}
@@ -111,11 +114,13 @@ Our intuitions from this results would be that when there is proportionally less
 If we want to understand how the model answer different questions, a good way is to ask if the accuracy is cummulative, meaning that if better models answer correctly all the answer correctly that a worse model would, in adition to the answers that the worse model could not get correctly. With this question we would be able to identify if the main driving force of improvement comes from a specific set of questions that a worse model was definetly not able to answer, and an improved version woul be able to. By comparing accuracy distribution accross the entire test set, between the \textbf{all solved sanitized} and \textbf{hard-q solved sanitized} and also between \textbf{all solved sanitized} and \textbf{baseline}, we have found that the accuracy is not entirely commulative, as the instances were the less capable model is capable to answer when the smarter model is not is non-zero. 
 \begin{table}[ht]
 \centering
- \begin{tabular}{lcccc}
- Name & Accuracy & Draw & Win & Lose\\
+ \begin{tabular}{|l|c|c|c|c|}
+ \hline
+ \textbf{Name} & \textbf{Accuracy} & \textbf{Draw} & \textbf{Win} & \textbf{Lose}\\
  \hline
  baseline & 0.6839 & 1085 & 64 & 170 \\
  hard-q solved sanitized & 0.6861 & 1068 & 74 & 177\\
+ \hline
  \end{tabular}
  \caption{Difference against \textbf{all solved sanitized}, where \textit{Draw} represents the amount of times both models were equally correct or incorrect for a particular question, \textit{Win} represents the times when the less capable was correct on questions that the model with higher accuracy was not and \textit{Lose} represents the times when the more capable model was answer correctly and the less capable model did not}
 \end{table}
@@ -131,11 +136,13 @@ To get a more clear view on what makes the models different is to keep looking t
 
 \begin{table}[ht]
 \centering
- \begin{tabular}{lccc}
- Name  & Median Diff Lenght & Mean Diff Lenght & Mean Cosine Similarity \\
+ \begin{tabular}{|l|c|c|c|}
+ \hline
+ \textbf{Name} & \textbf{Median Diff Lenght} & \textbf{Mean Diff Lenght} & \textbf{Mean Cosine Similarity} \\
  \hline
  baseline & 18.00 & 31.69  & 0.2497 \\
  hard-q solved sanitized & -11.00 & -50.69 & 0.2751 \\
+ \hline
  \end{tabular}
  \caption{Difference between models with \textbf{all solved sanitized}. }
 \end{table}
@@ -152,18 +159,86 @@ This is an example that shows the value of the filtering mechanism used to ident
 A reason why the use of synthetic data might be better for this task than using gold labels, could be that as the model is already aligned to predict the data is trained on, the signal from the loss function could be focusing on being used to parameters that have a more a direct impact on computing the correct result in a math world problem, rather than, for instance focusing on optimizing writing style to be adapted as the writing in the gold labels. Another good reason to use synthetic data is that is easier to expand and improve, as it is dynamic there are ways to explore on how to improve the quality of this data generated from the model in the initial pass and the refinement step, being more cheap than collecting data from human crowdworkes. 
 
 \subsection{What makes some questions harder than others?}
-\subsubsection{Lenght of the question}
-\subsubsection{Amount of numbers in question}
-\subsubsection{Amount of steps in gold answer}
-\subsubsection{Lenght of the steps in gold}
-\subsubsection{Operations in gold answer}
-\subsubsection{Number sizes in gold answer}
-\subsubsection{What kind of question-answer was the model able to refine?}
+A simple way is to measure the following aspects from the GSM8K, and compute the correlation between the answer being corret based on those metrics.
 
-\section{Conclusion}
-overview improvements future work
-\subsection{Future Work}
+\begin{itemize}
+ \item \textbf{Lenght of the question} Count the character lenght of the question.
+ \item \textbf{Amount of numbers in question} Count the amount of numbers present in the Math Word Problem question.
+ \item \textbf{Amount of steps in gold answer} Gold answers are written by humans with a clear structure for each step separeted by a newline, count the new lines and use that as number of steps.
+ \item \textbf{Lenght of the steps in gold}: Count the lenght of each step, and divide it by the amount of steps.
+ \item \textbf{Operations in gold answer} Count the times each operation (+-/*) is used in the gold answer.
+ \item \textbf{Total number of operations} Total amount of operations used in the gold answer.
+ \item \textbf{Number sizes in gold answer} The order ? or the number expectred to answer.
+\end{itemize}
 
+
+\begin{table}[htbp]
+\centering
+\setlength{\tabcolsep}{4pt}  % Reduce column separation
+\begin{tabular}{|l|c|c|p{4.5cm}|}
+\hline
+\textbf{Factor} & \textbf{Correlation Coefficient} & \textbf{P-value} & \textbf{Interpretation} \\
+\hline
+Number of numbers in gold answer & -0.2022 & 0.0000 & Most challenging \\
+Number of numbers in question & -0.1956 & 0.0000 & Very challenging \\
+Gold answer length & -0.1831 & 0.0000 & Challenging \\
+Number of gold steps & -0.1377 & 0.0000 & Moderately challenging \\
+Mean step length & -0.1308 & 0.0000 & Moderately challenging \\
+Question length & -0.1228 & 0.0000 & Moderately challenging \\
+Multiplication (*) operations & -0.0998 & 0.0000 & Slightly challenging \\
+Division (/) operations & -0.0872 & 0.0000 & Slightly challenging \\
+Subtraction (-) operations & -0.0100 & 0.3890 & Negligible effect (not statistically significant) \\
+Addition (+) operations & -0.0088 & 0.4490 & Negligible effect (not statistically significant) \\
+Expected label size & -0.0014 & 0.9013 & No significant effect \\
+\hline
+\end{tabular}
+\caption{Factors affecting question difficulty in GSM8K dataset, sorted from most challenging to least challenging}
+\label{tab:gsm8k_correlations}
+\end{table}
+
+
+\subsubsection{What kind of questions was the model able to refine?}
+
+\begin{table}[htbp]
+\centering
+\setlength{\tabcolsep}{4pt}  % Reduce column separation
+\begin{tabular}{|l|c|c|p{4.5cm}|}
+\hline
+\textbf{Factor} & \textbf{Refinement Correlation} & \textbf{P-value} & \textbf{Interpretation} \\
+\hline
+Addition (+) operations & -0.1092 & 0.0000 & Most hindering to refinement \\
+Question length & -0.0956 & 0.0000 & Hindering \\
+Number of gold steps & -0.0946 & 0.0000 & Hindering \\
+Gold answer length & -0.0913 & 0.0000 & Hindering \\
+Number of numbers in gold answer & -0.0854 & 0.0001 & Hindering \\
+Number of numbers in question & -0.0634 & 0.0038 & Slightly hindering \\
+Mean step length & -0.0459 & 0.0362 & Slightly hindering \\
+Subtraction (-) operations & -0.0416 & 0.0573 & Very slightly hindering (not statistically significant) \\
+Multiplication (*) operations & -0.0104 & 0.6346 & Negligible effect (not statistically significant) \\
+Division (/) operations & -0.0080 & 0.7139 & Negligible effect (not statistically significant) \\
+Expected label size & 0.0433 & 0.0480 & Slightly helping (barely statistically significant) \\
+\hline
+\end{tabular}
+\caption{Factors affecting refinement success for initially incorrect answers in GSM8K dataset, sorted from most hindering to most helping}
+\label{tab:gsm8k_refinement_correlations}
+\end{table}
+
+\subsubsection{What kind of answers was the model able to refine}
+\begin{table}[ht]
+\centering
+\begin{tabular}{lcc}
+\hline
+Metric & Original Incorrect & Refined Correct \\
+\hline
+Mean Cosine Similarity & \multicolumn{2}{c}{0.85} \\
+Mean Answer Length & 615 & 731 \\
+Median Readability Score & 6.5 & 7.1 \\
+Mean Number of Operations & 4.2 & 5.8 \\
+\hline
+\end{tabular}
+\caption{Summary Statistics of Original vs. Refined Answers}
+\label{tab:summary}
+\end{table}
 
 
 \end{document}
